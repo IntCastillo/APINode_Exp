@@ -1,5 +1,6 @@
 const Place = require('../models/Place');
-
+const upload = require('../config/upload');
+const uploader = require('../models/uploader');
 function find(req,res,next){
     Place.findById(req.params.id)
     .then(place=>{
@@ -19,7 +20,7 @@ function index(req,res){
     res.json(err);
     })
 }
-function create(req,res){
+function create(req,res,next){
     //Crear nuevos lugares
     Place.create({
         title: req.body.title,
@@ -28,10 +29,10 @@ function create(req,res){
         openHour: req.body.openHour,
         closeHour: req.body.closeHour
      }).then(doc=>{
-       res.json(doc)
+       req.place = doc;
+       next();
      }).catch(err=>{
-       console.log(err);
-       res.json(err);
+       next(err);
      });
 }
 function show(req,res){
@@ -71,4 +72,46 @@ function destroy(req,res){
         })
 }
 
-module.exports = {index,show,create,destroy,update,find};
+function multerMiddleware(){
+    return upload.fields([
+    {name: 'avatar', maxCount: 1},
+    {name: 'cover', maxCount:1},
+    ]);
+}
+
+function saveImage(req,res){
+    if(req.place){
+        const files = ['avatar','cover'];
+        const promises = [];
+        files.forEach(imageType=>{
+         if(req.files && req.files[imageType]){
+         const path = req.files[imageType][0].path;
+         promises.push(req.place.updateImage(path,imageType));  // Guardar promesa!!!
+
+         }
+        
+        })
+
+        Promise.all(promises).then(results=>{
+            console.log(results);
+            res.json(req.place);
+        }).catch(err=>{
+            console.log(err);
+            res.json(err);
+        }); 
+     
+//          uploader(path).then(result=>{
+//              console.log(result);
+//              res.json(req.place);
+//          }).catch(err=>{
+//              res.json(err);
+//          })
+    }else{
+       res.status(422).json({  //Los datos no se pudieron procesar!
+           error: req.error || 'Could not save place'
+       });
+    }
+
+}
+
+module.exports = {index,show,create,destroy,update,find,multerMiddleware,saveImage};
