@@ -38,7 +38,57 @@ app.post('/places',(req,res)=>{
      res.json(doc)
    }).catch(err=>{
      console.log(err);
+   });
+});
+
+app.get('/places', (req,res)=>{
+   Place.find({})
+   .then(docs=>{
+     res.json(docs);
+   }).catch(err=>{
+     console.log(err);
+     res.json(err);
    })
+});
+
+app.get('/places/:id',(req,res)=>{
+  Place.findById(req.params.id)
+   .then(doc=>{
+     res.json(doc)
+   }).catch(err=>{
+     console.log(err);
+      res.json(err);
+   })
+  //Otra opción:
+  //Place.findOne({}) => Place.findById({}) 
+})
+
+app.put('/places/:id', (req,res)=>{
+//   Place.findById(req.params.id)
+//   .then(doc=>{
+//     doc.title = req.body.title;
+//     doc.description = req.body.description;
+//
+//     doc.save();
+//   })
+//Búsqueda y valores a asignar =>>>
+
+  let attributes = ['title','description','acceptsCreditCard','openHour','closeHour'];
+  let placeParams = {};
+   attributes.forEach(attr=>{
+      if(Object.prototype.hasOwnProperty.call(req.body,attr))
+      placeParams[attr]= req.body[attr];
+   })
+//Place.update => Place.findOneAndUpdate
+//Place.findByIdAndUpdate(req.params.id,placeParams,{new: true})
+ Place.findOneAndUpdate({'_id': req.params.id},placeParams,{new: true})
+   .then(doc=>{      //Up=> Criterios de búsqueda, campos a actualizar!
+   res.json(doc);         
+  }).catch(err=>{
+    console.log(err);
+    res.json(err);
+  });
+
 })
 
 // catch 404 and forward to error handler
