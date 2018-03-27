@@ -3,14 +3,14 @@ const Place = require('../models/Place');
 let router = express.Router();
 const placesController = require('../controllers/PlacesController');
 
-router.route('/')
+  router.route('/')
  .get(placesController.index)
  .post(placesController.create)
 
- router.route('/:id')
-   .get(placesController.show)
+  router.route('/:id')
+  .get(placesController.find,placesController.show)
 
-  .put(placesController.update)
+  .put(placesController.find,placesController.update)
     //   Place.findById(req.params.id)
     //   .then(doc=>{
     //     doc.title = req.body.title;
@@ -19,7 +19,7 @@ router.route('/')
     //     doc.save();
     //   })
     //Búsqueda y valores a asignar =>>>
- .delete(placesController.destroy)
+  .delete(placesController.find,placesController.destroy)
 
  //CRUD 'operaciones usadas' = {
  // create,
