@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const mongoosePaginate = require('mongoose-paginate');
 
 //Generar un esquema
 
@@ -19,6 +19,7 @@ let placeSchema = new mongoose.Schema({
      closeHour: Number
 });
 
+placeSchema.plugin(mongoosePaginate);
 let Place = mongoose.model('Place', placeSchema);
 
 module.exports = Place;
